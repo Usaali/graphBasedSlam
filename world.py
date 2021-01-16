@@ -2,6 +2,7 @@ import random as rand
 from vehicle import vehicle
 import seaborn
 import matplotlib.pyplot as plt
+import numpy as np
 
 class world:
     def __init__(self,size: int, num_landmarks: int):
@@ -13,7 +14,7 @@ class world:
         """
         self.size = size
         self.num_landmarks = num_landmarks
-        self.landmarks = []
+        self.landmarks = None
         self.createLandmarks()
         plt.ion()
         seaborn.set_style("whitegrid")
@@ -31,8 +32,10 @@ class world:
     def createLandmarks(self):
         """populates the world with randomly placed landmarks
         """
+        temp = []
         for i in range(self.num_landmarks):
-            self.landmarks.append([round(rand.random()*self.size),round(rand.random()*self.size)])
+            temp.append([round(rand.random()*self.size),round(rand.random()*self.size),i])
+        self.landmarks = np.array(temp)
 
     def plot(self, v: vehicle):
         """Displays/Updates a plot with all landmarks and the robot path 
@@ -51,6 +54,8 @@ class world:
         plt.plot(*zip(*v.true_path),color = "black")
         plt.plot(v.pos[0],v.pos[1],marker="^",color = 'r')
         plt.plot(v.true_pos[0],v.true_pos[1],marker="^",color = 'black')
+        circ = plt.Circle((v.true_pos[0],v.true_pos[1]), v.sense_range, color='blue' , fill=False)
+        axes.add_patch(circ)
         axes.set_xticks([x for x in range(self.size+1)],minor = True)
         axes.set_yticks([y for y in range(self.size+1)],minor = True)
         plt.draw()
