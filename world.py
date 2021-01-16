@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 
 class world:
     def __init__(self,size: int, num_landmarks: int):
+        """A square world object that can inhabit vehicles
+
+        Args:
+            size (int): The world size
+            num_landmarks (int): The amount of landmarks in the world
+        """
         self.size = size
         self.num_landmarks = num_landmarks
         self.landmarks = []
@@ -15,13 +21,25 @@ class world:
         plt.figure()
     
     def getLandmarks(self):
+        """Returns all landmarks
+
+        Returns:
+            List[List[float]]: a list of landmarks
+        """
         return self.landmarks
 
     def createLandmarks(self):
+        """populates the world with randomly placed landmarks
+        """
         for i in range(self.num_landmarks):
             self.landmarks.append([round(rand.random()*self.size),round(rand.random()*self.size)])
 
     def plot(self, v: vehicle):
+        """Displays/Updates a plot with all landmarks and the robot path 
+
+        Args:
+            v (vehicle): The vehicle to include in the plot
+        """
         plt.clf()
         axes = plt.gca()
         #axes.text(v.pos[0],v.pos[1], 'x', ha='center', va='center', color='r', fontsize=15)

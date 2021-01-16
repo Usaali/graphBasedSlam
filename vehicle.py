@@ -23,14 +23,36 @@ class vehicle:
         self.path = []
         self.true_path = []
     
-    def rand(self, mean, std):
-        r = rand.gauss(mean,std)
+    def rand(self, mean: float, std: float):
+        """Creates a gaussian random value
+
+        Args:
+            mean (float): The mean of the gaussian curve
+            std (float): The standard derivation of the gaussian curve
+
+        Returns:
+            float: The random value
+        """
         return rand.gauss(mean,std)
 
     def get_detected(self):
+        """returns a list of detected landmarks
+
+        Returns:
+            [[float, float]]: the currently detected landmarks 
+        """
         return self.detected_landmarks
 
-    def move(self,dx,dy):
+    def move(self,dx: float,dy: float):
+        """Moves the vehicle
+
+        Args:
+            dx (float): The delta x value to move
+            dy (float): The delta y value to move
+
+        Returns:
+            (bool): False if movement would move the vehicle out of the world
+        """
         x = self.rand(self.pos[0] + dx, self.movement_error)
         y = self.rand(self.pos[1] + dy, self.movement_error)
         if x < 0.0 or x > self.plane_size or y < 0.0 or y > self.plane_size:
@@ -44,11 +66,21 @@ class vehicle:
             self.true_path.append([*self.true_pos])
             return True
     
-    def get_manhatten(self, pos1):
+    def get_manhatten(self, pos1: List[float]):
+        """Returns the manhatten distance to a point
+
+        Args:
+            pos1 (List[float]): The point to measure the distance to
+
+        Returns:
+            (float): The manhatten distance
+        """
         return abs(self.true_pos[0]-pos1[0]) + abs(self.true_pos[1] - pos1[1])
 
 
     def sense(self):
+        """Detects if any Landmarks are in reach
+        """
         self.detected_landmarks = []
         for l in self.world.getLandmarks():
             if self.get_manhatten(l) <= self.sense_range :
