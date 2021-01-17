@@ -22,8 +22,10 @@ class vehicle:
         self.detected_landmarks = None
         self.path = np.array([[self.plane_size/2,self.plane_size/2]]) #path with first element absolute and all others as relative poses
         self.true_path = np.array([[self.plane_size/2,self.plane_size/2]])
+        self.err_path = np.array([[self.plane_size/2,self.plane_size/2]])
+
     
-    def rand(self, mean: float, std: float):
+    def rand(self, mean: float, std: float) -> float:
         """Creates a gaussian random value
 
         Args:
@@ -43,7 +45,7 @@ class vehicle:
         """
         return self.detected_landmarks
 
-    def move(self,dx: float,dy: float):
+    def move(self,dx: float,dy: float) -> bool:
         """Moves the vehicle
 
         Args:
@@ -53,24 +55,22 @@ class vehicle:
         Returns:
             (bool): False if movement would move the vehicle out of the world
         """
-        x = self.rand(self.pos[0] + dx, self.movement_error)
-        y = self.rand(self.pos[1] + dy, self.movement_error)
-        if x < 0.0 or x > self.plane_size or y < 0.0 or y > self.plane_size:
-            return False
-        else:
-            self.true_pos[0] += dx
-            self.true_pos[1] += dy
-            self.pos[0] = x
-            self.pos[1] = y
-            print(self.path)
-            self.path = np.append(self.path,[[*self.pos]],axis=0)
-            self.true_path = np.append(self.true_path,[[*self.true_pos]],axis=0)
-
-            self.sense()
-            self.world.plot(self)
-            return True
+        self.sense()
+        self.world.plot(self)
+        
+        self.true_pos[0] += dx
+        self.true_pos[1] += dy
+        dx = self.rand(dx, self.movement_error)
+        dy = self.rand(dy, self.movement_error)
+        self.pos[0] = dx
+        self.pos[1] = dy
+        self.err_path = np.append(self.err_path, [[self.err_path[-1][0]+dx,self.err_path[-1][1]+dy]],axis = 0)
+        self.true_path = np.append(self.true_path,[[*self.true_pos]],axis=0)
+        #self.sense()
+        #self.world.plot(self)
+        return True
     
-    def get_manhatten(self, pos):
+    def get_manhatten(self, pos) -> float:
         """Returns the manhatten distance to a point
 
         Args:
@@ -81,7 +81,7 @@ class vehicle:
         """
         return abs(self.true_pos[0]-pos[0]) + abs(self.true_pos[1] - pos[1])
 
-    def get_euklidean(self,pos):
+    def get_euklidean(self,pos) -> float:
         """Returns the euklidean distance to a point
 
         Args:
@@ -98,5 +98,5 @@ class vehicle:
         temp = []
         for l in self.world.getLandmarks():
             if self.get_euklidean(l) <= self.sense_range :
-                temp.append([self.rand(l[0],self.measuring_error),self.rand(l[1],self.measuring_error),l[2]])
+                temp.append([self.rand(l[0]-self.true_pos[0],self.measuring_error),self.rand(l[1]-self.true_pos[1],self.measuring_error),l[2]])
         self.detected_landmarks = np.array(temp)
