@@ -17,8 +17,9 @@ class slam:
         self.omega = np.zeros((2+2*self.num_landmarks,2+2*self.num_landmarks))
         self.eta = np.zeros((2+2*self.num_landmarks))
 
-        for i in range(len(self.omega)):
-            self.omega[i][i] = 1
+        self.omega[0][0] = 1
+        self.omega[1][1] = 1
+
 
         if(start is None):
             self.eta[0] = self.world_size/2
@@ -27,7 +28,6 @@ class slam:
             self.eta[0] = start[0]/2
             self.eta[1] = start[1]/2
         
-
         self.veh.sense()
         measurement_factor = 1
         movement_factor = 1
@@ -96,7 +96,7 @@ class slam:
     def slam_step(self):
 
         #a step from X_i to X_j
-        #indices for the matrix
+        #indices                                                                                                                                                for the matrix
         x_i = len(self.omega[0]) - 2*self.num_landmarks - 2
         y_i = x_i + 1
         self.extend_matrices()
@@ -139,6 +139,7 @@ class slam:
         landmark_zero = len(self.omega[0])-2*self.num_landmarks #position of the first landmark entry
         for landmark in self.veh.get_detected():
             l_num = landmark[2] #number of landmark
+            #print("Landmark number: "+str(l_num)+"\n")
             l_meas_x = landmark[0] #measured x distance
             l_meas_y = landmark[1]
 
@@ -160,11 +161,26 @@ class slam:
             self.eta[y_j] -= l_meas_y/movement_factor
             self.eta[l_x] += l_meas_x/movement_factor
             self.eta[l_y] += l_meas_y/movement_factor
+
         return self.get_estimate()
 
     def get_estimate(self):
-        z = np.matmul(np.linalg.inv(self.omega), self.eta)
-        pos = len(self.omega) - 2*self.num_landmarks -2
+        #the matrix might have landmarks in it that never got detected, making it singular
+        remove_count = 0
+        om = np.copy(self.omega)
+        et = np.copy(self.eta)
+        undetected = []
+        for i in range(len(om)):
+            if(om[i][i] == 0):
+                undetected.append(i)
+        for i in reversed(undetected):
+            om = np.delete(om,i,0)
+            om = np.delete(om,i,1)
+            et = np.delete(et,i,0)
+            remove_count += 1
+        print(om)
+        z = np.matmul(np.linalg.inv(om), et)
+        pos = len(om) - 2*(self.num_landmarks-remove_count) - 2
         est_pos = [z[pos],z[pos+1]]
         self.veh.path =  np.append(self.veh.path,[[*est_pos]],axis=0)
         return [*est_pos]
@@ -173,25 +189,22 @@ class slam:
         #plt.pause(0.01)        
 
 if __name__ == "__main__":
-    plane = world(20,1)
-    veh = vehicle(plane,movementError= 0, measuringError = 0 , sensRange= 20)
+    plane = world(50,20)
+    veh = vehicle(plane,movementError= 2, measuringError = 1 , sensRange= 20)
     #time.sleep(2)
     s = slam(veh)
     while True:
-        veh.move(0,1)
-        print(s.slam_step())
+        #veh.move(0,5)
+        #print(s.slam_step())
+        #plane.plot(veh)
         #s.plot_matrices()
-        input()
-        continue
-
-
         for i in range(10):
             step = pi/5 * i
             veh.move(20*(sin(step+pi/10)-sin(step)),20*(cos(step+pi/10)-cos(step)))
             s.slam_step()
             print(s.get_estimate())
-            time.sleep(2)
-
+            time.sleep(0.5)
+            plane.plot(veh)
         #s.plot_matrices()
         #print(s.omega)
         print(s.eta)

@@ -55,9 +55,6 @@ class vehicle:
         Returns:
             (bool): False if movement would move the vehicle out of the world
         """
-        self.sense()
-        self.world.plot(self)
-        
         self.true_pos[0] += dx
         self.true_pos[1] += dy
         dx = self.rand(dx, self.movement_error)
@@ -66,7 +63,7 @@ class vehicle:
         self.pos[1] = dy
         self.err_path = np.append(self.err_path, [[self.err_path[-1][0]+dx,self.err_path[-1][1]+dy]],axis = 0)
         self.true_path = np.append(self.true_path,[[*self.true_pos]],axis=0)
-        #self.sense()
+        self.sense()
         #self.world.plot(self)
         return True
     
