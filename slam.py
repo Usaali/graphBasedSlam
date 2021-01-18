@@ -178,9 +178,15 @@ class slam:
             om = np.delete(om,i,1)
             et = np.delete(et,i,0)
             remove_count += 1
+        #print(self.omega)
+        #print(self.eta)
         print(om)
+        print(et)
+        print("Removed "+str(remove_count))
         z = np.matmul(np.linalg.inv(om), et)
-        pos = len(om) - 2*(self.num_landmarks-remove_count) - 2
+        print(z)
+        pos = len(om) - floor(2*(self.num_landmarks-(remove_count/2))) - 2
+        print(pos)
         est_pos = [z[pos],z[pos+1]]
         self.veh.path =  np.append(self.veh.path,[[*est_pos]],axis=0)
         return [*est_pos]
@@ -189,27 +195,28 @@ class slam:
         #plt.pause(0.01)        
 
 if __name__ == "__main__":
-    plane = world(50,20)
-    veh = vehicle(plane,movementError= 2, measuringError = 1 , sensRange= 20)
+    plane = world(100,100)
+    print(plane)
+    veh = vehicle(plane,movementError= 1, measuringError = 2 , sensRange= 20)
+    print(veh)
     #time.sleep(2)
     s = slam(veh)
     while True:
         #veh.move(0,5)
         #print(s.slam_step())
         #plane.plot(veh)
+        #input()
         #s.plot_matrices()
-        for i in range(10):
-            step = pi/5 * i
-            veh.move(20*(sin(step+pi/10)-sin(step)),20*(cos(step+pi/10)-cos(step)))
+        
+        for i in range(100):
+            step = pi/50 * i
+            veh.move(20*(sin(step+pi/100)-sin(step)),20*(cos(step+pi/100)-cos(step)))
             s.slam_step()
             print(s.get_estimate())
-            time.sleep(0.5)
+            #time.sleep(0.2)
             plane.plot(veh)
         #s.plot_matrices()
         #print(s.omega)
-        print(s.eta)
-        x = 0
-        y = 0
         input()
     #s.get_estimate(1)
     input()

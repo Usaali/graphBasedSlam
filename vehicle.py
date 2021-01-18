@@ -19,7 +19,7 @@ class vehicle:
         self.sense_range = sensRange
         self.movement_error = movementError
         self.measuring_error = measuringError
-        self.detected_landmarks = None
+        self.detected_landmarks = np.array([])
         self.path = np.array([[self.plane_size/2,self.plane_size/2]]) #path with first element absolute and all others as relative poses
         self.true_path = np.array([[self.plane_size/2,self.plane_size/2]])
         self.err_path = np.array([[self.plane_size/2,self.plane_size/2]])
@@ -94,6 +94,9 @@ class vehicle:
         """
         temp = []
         for l in self.world.getLandmarks():
-            if self.get_euklidean(l) <= self.sense_range :
+            if self.get_euklidean(l) <= self.sense_range or self.sense_range == -1:
                 temp.append([self.rand(l[0]-self.true_pos[0],self.measuring_error),self.rand(l[1]-self.true_pos[1],self.measuring_error),l[2]])
         self.detected_landmarks = np.array(temp)
+
+    def __repr__(self):
+        return "Vehicle at "+str(self.path[-1][0])+", "+str(self.path[-1][1])+" with "+str(len(self.detected_landmarks))+" detected landmarks"

@@ -14,7 +14,6 @@ class world:
         """
         self.size = size
         self.num_landmarks = num_landmarks
-        self.landmarks = None
         self.createLandmarks()
         plt.ion()
         seaborn.set_style("whitegrid")
@@ -62,3 +61,9 @@ class world:
         axes.set_yticks([y for y in range(self.size+1)],minor = True)
         plt.draw()
         plt.pause(0.001)
+
+    def __repr__(self):
+        string = "A world with size "+str(self.size)+" containg "+str(self.num_landmarks)+" landmarks\n"
+        for i in self.landmarks:
+            string += "Landmark number "+str(int(i[2]))+" at "+str(i[0])+", "+str(i[1])+"\n"
+        return string
