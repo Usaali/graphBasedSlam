@@ -1,7 +1,9 @@
 from world import world
 from vehicle import vehicle
+
 import numpy as np
 import time
+import os
 from math import pi,sin,cos,floor
 import seaborn
 import matplotlib.pyplot as plt
@@ -20,7 +22,7 @@ class slam:
         self.omega[0][0] = 1
         self.omega[1][1] = 1
 
-
+        #initialize the starting vector
         if(start is None):
             self.eta[0] = self.world_size/2
             self.eta[1] = self.world_size/2
@@ -32,6 +34,7 @@ class slam:
         measurement_factor = 1
         movement_factor = 1
 
+        # update the matrices with the data of the sensor
         for landmark in self.veh.get_detected():
             l_num = landmark[2] #number of landmark
             l_meas_x = landmark[0] #measured x distance
@@ -56,8 +59,9 @@ class slam:
             self.eta[l_x] += l_meas_x/movement_factor
             self.eta[l_y] += l_meas_y/movement_factor
         
-
     def plot_matrices(self):
+        """Plots the matrix omega and the vector as a heatmap for easier visualisation
+        """
         labels = []
         landmark_zero = len(self.omega[0])-2*self.num_landmarks #position of the first landmark entry
         for i in range(len(self.omega)):
@@ -79,11 +83,7 @@ class slam:
         plt.pause(0.01)
     
     def extend_matrices(self):
-        """[summary]
-
-        Args:
-            omega (np.array): [description]
-            eta (np.array): [description]
+        """This is a helper function to increase the dimension of the arrays
         """
         self.omega = np.insert(self.omega, len(self.omega)-2*self.num_landmarks, 0, axis = 0)
         self.omega = np.insert(self.omega, len(self.omega)-2*self.num_landmarks, 0, axis = 0)
@@ -94,9 +94,11 @@ class slam:
         self.eta = np.insert(self.eta, len(self.eta)-2*self.num_landmarks, 0, axis = 0)
 
     def slam_step(self):
-
-        #a step from X_i to X_j
-        #indices                                                                                                                                                for the matrix
+        """This describes a step form X_i to X_j in the slam algorithm
+            In this step the Matrix Omega and the Vector Eta is updated
+            The Current position can then later be calculated with z = Omega^-1 * eta
+        """
+        #indices in the matrix
         x_i = len(self.omega[0]) - 2*self.num_landmarks - 2
         y_i = x_i + 1
         self.extend_matrices()
@@ -107,6 +109,7 @@ class slam:
         dx = self.veh.pos[0]
         dy = self.veh.pos[1]
 
+        #exception for zero error, which would give the information a weight of infinite 
         if self.veh.measuring_error == 0:
             measurement_factor = 1
         else:
@@ -116,11 +119,11 @@ class slam:
         else:
             movement_factor = 1.0/self.veh.movement_error
 
+        #override the factors because they get very instable
         movement_factor = 1
         measurement_factor = 1
 
-        #Measurements
-
+        #update with information of movement
         self.omega[x_i][x_i] += movement_factor
         self.omega[x_j][x_j] += movement_factor
         self.omega[x_i][x_j] -= movement_factor
@@ -136,6 +139,7 @@ class slam:
         self.eta[x_j] += dx/movement_factor
         self.eta[y_j] += dy/movement_factor
         
+        #update with landmark information
         landmark_zero = len(self.omega[0])-2*self.num_landmarks #position of the first landmark entry
         for landmark in self.veh.get_detected():
             l_num = landmark[2] #number of landmark
@@ -161,25 +165,50 @@ class slam:
             self.eta[l_x] += l_meas_x/movement_factor
             self.eta[l_y] += l_meas_y/movement_factor
 
-        return self.get_estimate()
+        return self.get_estimate() #evaluate the matrices an return the current estimated positon
 
     def get_estimate(self):
+        """Evaluates the linear system and calculates the current position
+
+        Returns:
+            List(float): current estimated position
+        """
         #the matrix might have landmarks in it that never got detected, making it singular
         remove_count = 0
+        #copy the matrices so that the original is not modified
         om = np.copy(self.omega)
         et = np.copy(self.eta)
         undetected = []
+        #check which landmarks were never detected
         for i in range(len(om)):
             if(om[i][i] == 0):
                 undetected.append(i)
+        #remove undetected landmarks
         for i in reversed(undetected):
             om = np.delete(om,i,0)
             om = np.delete(om,i,1)
             et = np.delete(et,i,0)
             remove_count += 1
+        #now that all undetected landmarks are removed, omega is not singular and the linear system can be evaluated
         z = np.matmul(np.linalg.inv(om), et)
-        pos = len(om) - floor(2*(self.num_landmarks-(remove_count/2))) - 2
-        print(pos)
-        est_pos = [z[pos],z[pos+1]]
-        self.veh.path =  np.append(self.veh.path,[[*est_pos]],axis=0)
-        return [*est_pos]
+        #z includes all robot positions and all landmark positions
+        pos = len(om) - floor(2*(self.num_landmarks-(remove_count/2))) - 2  #get index for newest robot position
+        est_pos = [z[pos],z[pos+1]] #get newest positon
+        self.veh.path =  np.append(self.veh.path,[[*est_pos]],axis=0) #add the estimate to the vehicle
+        return [*est_pos] #return the estimate
+
+    def get_error(self):
+        """This function calculates the error in the estimation using APE
+            TODO Ape calculation
+        """
+        file_path = "./trajFiles"
+        if(not os.path.exists(file_path)):
+            os.mkdir(file_path)
+        truthFile = open(file_path+"/truth","w")
+        estFile = open(file_path+"/est","w")
+        for i in range(len(self.veh.true_path)):
+            truthFile.write(str(i)+" "+str(self.veh.true_path[i][0])+" "+str(self.veh.true_path[i][1])+" 0 0 0 0 0\n")
+        for i in range(len(self.veh.path)):
+            estFile.write(str(i)+" "+str(self.veh.path[i][0])+" "+str(self.veh.path[i][1])+" 0 0 0 0 0\n")
+        truthFile.close()
+        estFile.close()

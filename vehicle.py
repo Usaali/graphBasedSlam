@@ -55,15 +55,21 @@ class vehicle:
         Returns:
             (bool): False if movement would move the vehicle out of the world
         """
+        #check if robot would move out of bounds
+        if(self.true_pos[0] + dx > self.world.size or self.true_pos[0] + dx < 0 or self.true_pos[1] + dy > self.world.size or self.true_pos[1] + dy < 0):
+            return False
+        #update ground truth path
         self.true_pos[0] += dx
         self.true_pos[1] += dy
+        #get the noisy values
         dx = self.rand(dx, self.movement_error)
         dy = self.rand(dy, self.movement_error)
         self.pos[0] = dx
         self.pos[1] = dy
+        # add path of all errors for visualization
         self.err_path = np.append(self.err_path, [[self.err_path[-1][0]+dx,self.err_path[-1][1]+dy]],axis = 0)
         self.true_path = np.append(self.true_path,[[*self.true_pos]],axis=0)
-        self.sense()
+        self.sense() #detect landmarks
         return True
     
     def get_manhatten(self, pos) -> float:
@@ -93,6 +99,7 @@ class vehicle:
         """
         temp = []
         for l in self.world.getLandmarks():
+            #check if landmark is in range or range was set to -1 for detecting all landmarks
             if self.get_euklidean(l) <= self.sense_range or self.sense_range == -1:
                 temp.append([self.rand(l[0]-self.true_pos[0],self.measuring_error),self.rand(l[1]-self.true_pos[1],self.measuring_error),l[2]])
         self.detected_landmarks = np.array(temp)
