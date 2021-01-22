@@ -139,7 +139,6 @@ class slam:
         landmark_zero = len(self.omega[0])-2*self.num_landmarks #position of the first landmark entry
         for landmark in self.veh.get_detected():
             l_num = landmark[2] #number of landmark
-            #print("Landmark number: "+str(l_num)+"\n")
             l_meas_x = landmark[0] #measured x distance
             l_meas_y = landmark[1]
 
@@ -178,56 +177,9 @@ class slam:
             om = np.delete(om,i,1)
             et = np.delete(et,i,0)
             remove_count += 1
-        #print(self.omega)
-        #print(self.eta)
-        print(om)
-        print(et)
-        print("Removed "+str(remove_count))
         z = np.matmul(np.linalg.inv(om), et)
-        print(z)
         pos = len(om) - floor(2*(self.num_landmarks-(remove_count/2))) - 2
         print(pos)
         est_pos = [z[pos],z[pos+1]]
         self.veh.path =  np.append(self.veh.path,[[*est_pos]],axis=0)
         return [*est_pos]
-        #plt.figure()
-        #seaborn.heatmap(DataFrame(z), cmap='Reds', annot=True, linewidths=.5)
-        #plt.pause(0.01)        
-
-if __name__ == "__main__":
-    plane = world(100,100)
-    print(plane)
-    veh = vehicle(plane,movementError= 1, measuringError = 2 , sensRange= 20)
-    print(veh)
-    #time.sleep(2)
-    s = slam(veh)
-    while True:
-        #veh.move(0,5)
-        #print(s.slam_step())
-        #plane.plot(veh)
-        #input()
-        #s.plot_matrices()
-        
-        for i in range(100):
-            step = pi/50 * i
-            veh.move(20*(sin(step+pi/100)-sin(step)),20*(cos(step+pi/100)-cos(step)))
-            s.slam_step()
-            print(s.get_estimate())
-            #time.sleep(0.2)
-            plane.plot(veh)
-        #s.plot_matrices()
-        #print(s.omega)
-        input()
-    #s.get_estimate(1)
-    input()
-    veh.move(20,0)
-    s.slam_step()
-    s.plot_matrices()
-    #s.get_estimate(1)
-    input()
-    exit()
-    while(True):
-        for i in range(10):
-            step = pi/5 * i
-            veh.move(60*(sin(step+pi/10)-sin(step)),60*(cos(step+pi/10)-cos(step)))
-            time.sleep(0.2)

@@ -44,7 +44,6 @@ class world:
         """
         self.fig.clf()
         axes = plt.gca()
-        #axes.text(v.pos[0],v.pos[1], 'x', ha='center', va='center', color='r', fontsize=15)
         for l in self.landmarks:
             plt.plot(l[0],l[1],marker="D",color = "b")
         for l in v.get_detected():
