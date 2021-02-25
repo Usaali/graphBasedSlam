@@ -35,8 +35,4 @@ for j = 1:size(z_IDs,1)  % For all combinations
         end
     end
 end
-
-edge = make_loop_edge(xlist(:, 1), xlist(:, nt_z), 1, nt_z);
-cost = cost + edge.e'*edge.OMEGA*edge.e; 
-edges = [edges, edge];
 fprintf('cost:%f, nedge:%f \n',cost, length(edges))
