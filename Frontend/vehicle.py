@@ -1,6 +1,7 @@
 import random as rand
 import numpy as np
-from math import pow,sqrt
+from math import pow,sqrt,atan2,remainder,pi
+
 class vehicle:
 
     def __init__(self, plane,  movementError: float = 1, measuringError: float = 1, sensRange: float = 10):
@@ -16,6 +17,7 @@ class vehicle:
         self.plane_size = plane.size
         self.true_pos = np.array([self.plane_size/2,self.plane_size/2])
         self.pos = np.array([self.plane_size/2,self.plane_size/2])
+        self.phi = 0
         self.sense_range = sensRange
         self.movement_error = movementError
         self.measuring_error = measuringError
@@ -36,6 +38,11 @@ class vehicle:
             float: The random value
         """
         return rand.gauss(mean,std)
+
+    def pi2pi(self,angle:float):
+        """Binds an angle from -pi to pi
+        """
+        return remainder(angle+pi,2*pi)-pi
 
     def get_detected(self):
         """returns a list of detected landmarks
@@ -62,6 +69,7 @@ class vehicle:
         self.true_pos[0] += dx
         self.true_pos[1] += dy
         #get the noisy values
+        self.phi = self.pi2pi(atan2(dy,dx))
         dx = self.rand(dx, self.movement_error)
         dy = self.rand(dy, self.movement_error)
         self.pos[0] = dx

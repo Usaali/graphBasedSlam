@@ -2,6 +2,7 @@ import random as rand
 from vehicle import vehicle
 import seaborn
 import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 import numpy as np
 
 class world:
@@ -17,7 +18,8 @@ class world:
         self.createLandmarks()
         plt.ion()
         seaborn.set_style("whitegrid")
-        plt.switch_backend("Qt5Agg")
+        seaborn.set_context("paper")
+        #plt.switch_backend("Qt5Agg")
         self.fig = plt.figure()
     
     def getLandmarks(self):
@@ -45,20 +47,34 @@ class world:
         self.fig.clf()
         axes = plt.gca()
         for l in self.landmarks:
-            plt.plot(l[0],l[1],marker="D",color = "b")
+            lm, = plt.plot(l[0],l[1],marker="D",color = "b")
         for l in v.get_detected():
-            plt.plot(v.path[-1][0]+l[0],v.path[-1][1]+l[1],marker="D",color = "y")
-        plt.plot(*zip(*v.true_path),color = "black")
-        plt.plot(*zip(*v.err_path),color = "yellow")
-        plt.plot(*zip(*v.path),color = "red",)
+            dlm, = plt.plot(v.path[-1][0]+l[0],v.path[-1][1]+l[1],marker="D",color = "y")
+        if(len(self.landmarks) > 0):
+            lm.set_label("landmarks")
+        if(len(v.get_detected()) > 0):
+            dlm.set_label("detected landmarks")
+        plt.plot(*zip(*v.true_path),color = "black", label = "groundtruth")
+        plt.plot(*zip(*v.err_path),color = "green", label = "raw trajectory with noise")
+        plt.plot(*zip(*v.path),color = "red", label = "calculated trajectory")
 
-        plt.plot(v.path[-1][0],v.path[-1][1],marker="^",color = 'r')
-        plt.plot(v.true_pos[0],v.true_pos[1],marker="^",color = 'black')
-        circ = plt.Circle((v.true_pos[0],v.true_pos[1]), v.sense_range, color='blue' , fill=False)
+        plt.plot(v.path[-1][0],v.path[-1][1],marker="^",color = 'r', label = "estimated positon")
+        plt.plot(v.true_pos[0],v.true_pos[1],marker="^",color = 'black', label="actual position")
+        circ = plt.Circle((v.true_pos[0],v.true_pos[1]), v.sense_range, color='blue' , fill=False, label = "sensing range")
         axes.add_patch(circ)
-        axes.set_xticks([x for x in range(self.size+1)],minor = True)
-        axes.set_yticks([y for y in range(self.size+1)],minor = True)
+
+        major_ticks = np.arange(0, self.size+1, 10)
+        minor_ticks = np.arange(0, self.size+1, 5)
+
+        axes.set_xticks(major_ticks)
+        axes.set_xticks(minor_ticks, minor=True)
+        axes.set_yticks(major_ticks)
+        axes.set_yticks(minor_ticks, minor=True)
+        axes.grid(which='minor', alpha=0.5)
+        axes.grid(which='major', alpha=1)
         plt.draw()
+        plt.tight_layout()
+        axes.legend(loc="upper right")
         plt.pause(0.001)
 
     def __repr__(self):
