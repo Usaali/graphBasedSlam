@@ -48,7 +48,7 @@ def driveStraight(plane: world,veh: vehicle, s: slam, dx: int, dy: int):
     plane.plot(veh)
 
 def backendData(slam):
-    file_path = "../Graph-based-SLAM-tutorial-master"
+    file_path = "../Backend"
     if(not os.path.exists(file_path)):
         os.mkdir(file_path)
     truthFile = open(file_path+"/truth.txt","w")
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     print(veh)
     s = slam(veh)
     plane.plot(veh)
-    
+
     while True:
         #driveStraight(plane,veh,s,1,0)
         #s.plot_matrices()
