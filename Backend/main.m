@@ -129,15 +129,16 @@ for t = 0:Ts:T_fin - Ts
             hold on
             grid on
             % Landmark
-            plot(RFID(:,1), RFID(:,2), '*k')   
+            plot(RFID(:,1), RFID(:,2), '*k', 'Displayname','Landmarks')   
             
             % True orbit
-            plot(hx_true(1,:), hx_true(2,:), 'b')
+            plot(hx_true(1,:), hx_true(2,:),'--','Color', '#000000', 'Displayname','Groundtruth','LineWidth',2)
             % dead reckoning
-            plot(hx_dr(1,:), hx_dr(2,:), 'k')
+            plot(hx_dr(1,:), hx_dr(2,:), 'r', 'Displayname','Estimation from frontend','LineWidth',2)
             % Optimal estimation
-            plot(x_opt(1,:), x_opt(2,:), 'r')
+            plot(x_opt(1,:), x_opt(2,:), 'b', 'Displayname','Optimized Trajectory','LineWidth',2)
             axis equal
+            legend
         end
     end
 end
