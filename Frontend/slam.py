@@ -91,11 +91,15 @@ class slam:
                     labels.append("L"+str(floor((i-landmark_zero)/2))+"_y")
 
         fig,(ax1, ax2) = plt.subplots(ncols=2,gridspec_kw={'width_ratios': [3, 1]})
-        
+        fig2, ax3 = plt.subplots()
         seaborn.heatmap(DataFrame(self.omega), cmap='Blues', annot=True, linewidths=.5, ax= ax1, xticklabels=labels, yticklabels=labels)
         seaborn.heatmap(DataFrame(self.eta), cmap='Blues', annot=True, linewidths=.5, ax = ax2, xticklabels=[""] ,yticklabels=labels)
         ax1.set_title("Omega")
         ax2.set_title("Eta")
+
+        seaborn.heatmap(DataFrame(self.z), cmap='Reds', annot=True, linewidths=.5, ax = ax3, xticklabels=[""] ,yticklabels=labels)
+        ax3.set_title("Z")
+
         plt.tight_layout()
         plt.pause(0.01)
     
