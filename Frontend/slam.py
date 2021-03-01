@@ -16,7 +16,7 @@ class slam:
         self.num_landmarks = self.veh.world.num_landmarks
         self.world_size = self.veh.world.size
         
-        self.pos_marker = 0
+        self.pos_marker = 0 #marker to save the index of last position
 
         #initialize constraints for starting point
         self.omega = np.zeros((2+2*self.num_landmarks,2+2*self.num_landmarks))
@@ -249,6 +249,7 @@ class slam:
     def get_error(self):
         """This function calculates the error in the estimation using APE
             TODO Ape calculation
+            Currently it just creates the truth and est files, that can be read using the evo tool to create ape and rpe analysis
         """
         file_path = "../../Graph-based-SLAM-tutorial-master"
         if(not os.path.exists(file_path)):

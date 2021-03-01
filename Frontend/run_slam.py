@@ -48,6 +48,11 @@ def driveStraight(plane: world,veh: vehicle, s: slam, dx: int, dy: int):
     plane.plot(veh)
 
 def backendData(slam):
+    """Creates the output files for the Matlab Optimization
+        NOTE: file_path should be the same directory as the main.m file of the Backend
+    Args:
+        s (slam): the slam object
+    """
     file_path = "../Backend"
     if(not os.path.exists(file_path)):
         os.mkdir(file_path)
@@ -86,18 +91,10 @@ if __name__ == "__main__":
     plane.plot(veh)
 
     while True:
-        #driveStraight(plane,veh,s,1,0)
-        #s.plot_matrices()
         driveCircle(plane,veh,s,20,50)
+        #driveStraight(plane,veh,s,1,0)
         #driveRandom(plane,veh,s,5,5)
-        #print(len(s.veh.path))
         backendData(s)
+        #s.plot_matrices()
         #s.get_error()
-
-        #pg=PoseGraph()
-        #pg.readGraph("trajFiles/vex", "trajFiles/edge")
-        #pg.optimize(10,True)
-        #with Path("trajFiles/optim").open('w') as w_f:
-        #    for i, node in enumerate(pg.node[:pg.path_len]):
-        #        w_f.write(f'{i} {float(node.pose[0])} {float(node.pose[1])} {float(node.pose[2])}\n')
         input()

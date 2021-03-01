@@ -15,16 +15,16 @@ class vehicle:
         """
         self.world = plane
         self.plane_size = plane.size
-        self.true_pos = np.array([self.plane_size/2,self.plane_size/2])
-        self.pos = np.array([self.plane_size/2,self.plane_size/2])
-        self.phi = 0
-        self.sense_range = sensRange
-        self.movement_error = movementError
-        self.measuring_error = measuringError
+        self.true_pos = np.array([self.plane_size/2,self.plane_size/2]) #the groundtruth position
+        self.pos = np.array([self.plane_size/2,self.plane_size/2])      #the noisy position
+        self.phi = 0    #angle in global coordinates
+        self.sense_range = sensRange    #range to detect landmarks. set -1 to detect all
+        self.movement_error = movementError #noise standard derivation for movement
+        self.measuring_error = measuringError #noise standard derivation for measurements
         self.detected_landmarks = np.array([])
         self.path = np.array([[self.plane_size/2,self.plane_size/2]]) #path with first element absolute and all others as relative poses
         self.true_path = np.array([[self.plane_size/2,self.plane_size/2]])
-        self.err_path = np.array([[self.plane_size/2,self.plane_size/2]])
+        self.err_path = np.array([[self.plane_size/2,self.plane_size/2]]) #noisy path, just for visualization
 
     
     def rand(self, mean: float, std: float) -> float:
