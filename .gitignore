@@ -130,3 +130,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Our generated files for SLAM
+truth.txt
+est.txt
+landmarks.txt
+landmark_vec.txt
