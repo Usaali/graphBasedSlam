@@ -19,7 +19,6 @@ opt_anime = 1;  % 1 for plotting
 %% Simulation parameters
 Ts = 1;   % sampling time[s]
 T_gslam = 10;   % graph slam sampling
-%T_fin = 5; % end time[s] check below
 
 global MAX_ITR
 MAX_ITR = 20;
